@@ -1,0 +1,27 @@
+{
+  "name": "serverless-plugin-lambda-account-access",
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=4.0"
+  },
+  "description": "A Serverless plugin to allow other accounts to invoke your Lambda functions",
+  "main": "add-permissions.js",
+  "scripts": {
+    "test": "echo \"No tests yet\"",
+    "posttest": "eslint ."
+  },
+  "author": "Russell Schick <rschick@bellwoods.ca>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rschick/serverless-plugin-lambda-account-access"
+  },
+  "keywords": [
+    "serverless",
+    "serverless plugins"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^3.11.1",
+    "semver": "^5.3.0"
+  }
+}
