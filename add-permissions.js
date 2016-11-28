@@ -42,7 +42,11 @@ module.exports = class AwsAddLambdaAccountPermissions {
 
   beforeDeploy() {
     const service = this.serverless.service;
-    const permitAccounts = service.provider && service.provider.permitAccounts.toString();
+    const permitAccounts =
+      service.provider &&
+      service.provider.permitAccounts &&
+      service.provider.permitAccounts.toString();
+
     if (permitAccounts) {
       permitAccounts.split(',').map(this.addPoliciesForAccount.bind(this));
     }
