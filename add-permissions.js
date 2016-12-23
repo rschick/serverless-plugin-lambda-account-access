@@ -20,7 +20,7 @@ module.exports = class AwsAddLambdaAccountPermissions {
     if (typeof service.functions !== 'object') {
       return;
     }
-    const resources = service.resources || {};
+    const resources = service.resources = service.resources || {};
     if (!resources.Resources) {
       resources.Resources = {};
     }
