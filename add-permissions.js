@@ -27,8 +27,8 @@ module.exports = class AwsAddLambdaAccountPermissions {
     Object.keys(service.functions).forEach(functionName => {
       const functionLogicalId = this.provider.naming
         .getLambdaLogicalId(functionName);
-      const resourceName = account.replace(/[_\W]/g, '')
-      resources.Resources[`${functionLogicalId}PermitInvokeFromAccount${resourceName}`] = {
+      const resourceName = account.replace(/\b\w/g, l => l.toUpperCase()).replace(/[_\W]+/g, "");
+      resources.Resources[`${functionLogicalId}PermitInvokeFrom${resourceName}`] = {
         Type: 'AWS::Lambda::Permission',
         Properties: {
           Action: 'lambda:InvokeFunction',
