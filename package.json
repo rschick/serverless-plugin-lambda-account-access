@@ -8,7 +8,9 @@
   "main": "add-permissions.js",
   "scripts": {
     "test": "echo \"No tests yet\"",
-    "posttest": "eslint ."
+    "posttest": "eslint .",
+    "preversion": "npm test",
+    "postversion": "git push && git push --tags"
   },
   "author": "Russell Schick <rschick@bellwoods.ca>",
   "repository": {
