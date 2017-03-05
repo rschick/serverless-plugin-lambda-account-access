@@ -1,0 +1,6 @@
+deployment:
+  master:
+    branch: master
+    owner: rschick
+    commands:
+      - npm publish

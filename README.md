@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/rschick/serverless-plugin-lambda-account-access/tree/master.svg?style=svg)](https://circleci.com/gh/rschick/serverless-plugin-lambda-account-access/tree/master)
+
 # serverless-plugin-lambda-account-access
 
 Add policies to allow cross-account access to your functions.
