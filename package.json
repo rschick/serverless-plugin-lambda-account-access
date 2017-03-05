@@ -10,7 +10,7 @@
     "test": "echo \"No tests yet\"",
     "posttest": "eslint .",
     "preversion": "npm test",
-    "postversion": "git push && git push --tags"
+    "postversion": "git push --follow-tags"
   },
   "author": "Russell Schick <rschick@bellwoods.ca>",
   "repository": {
