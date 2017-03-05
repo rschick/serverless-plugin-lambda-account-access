@@ -1,6 +1,6 @@
 {
   "name": "serverless-plugin-lambda-account-access",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "engines": {
     "node": ">=4.0"
   },
