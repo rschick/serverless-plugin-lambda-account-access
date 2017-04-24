@@ -15,27 +15,38 @@ plugins:
   - serverless-plugin-lambda-account-access
 
 provider:
-  permitAccounts: 000001,000002 # CSV list of AWS account numbers
+  allowAccounts: # can be defined as a single value or an array
+    - 111111111111 # principal as accountId
+    - 'arn:aws:iam::222222222222:root' # principal as ARN
 
 functions:
   function1:
   function2:
+    allowAccess: false # excludes specific function
+  function3:
+    allowAccess: 333333333333 # allows access from these principals instead of the globally defined ones
 ```
 
-The above allows all functions to be invoked from the listed accounts.
+The above allows all functions to be invoked from the principals listed in `provider` section, unless access is explicitly forbidden inside function config (`function2`), or accounts list is overridden locally (`function3`).
 
 Permissions are granted by adding resources of the form:
 
 ```yaml
 resources:
   Resources:
-    Function1LambdaFunctionPermitInvokeFromAccount000001:
-	  Type: AWS::Lambda::Permission
+    Function1LambdaFunctionPermitInvokeFrom111111111111:
+    Type: AWS::Lambda::Permission
       Properties:
         Action: lambda:InvokeFunction
         FunctionName:
           Fn::GetAtt:
             - Function1LambdaFunction
             - Arn
-	    Principal: 000001
+      Principal: '111111111111'
 ```
+
+## Migration From 1.x
+
+Version 2 has the following breaking changes:
+  - `permitAccounts` field was changed to `allowAccess`
+  - multiple principals can be defined as an array, instead of CSV list
