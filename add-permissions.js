@@ -11,45 +11,56 @@ module.exports = class AwsAddLambdaAccountPermissions {
     this.options = options;
     this.provider = this.serverless.getProvider('aws');
     this.hooks = {
-      'before:deploy:deploy': () => this.beforeDeploy(),
+      'before:deploy:createDeploymentArtifacts': () => this.beforeDeploy(),
     };
   }
 
-  addPoliciesForAccount(account) {
+  addPoliciesForFunctions(globalAllowAccess) {
     const service = this.serverless.service;
     if (typeof service.functions !== 'object') {
       return;
     }
+
     const resources = service.resources = service.resources || {};
     if (!resources.Resources) {
       resources.Resources = {};
     }
+
     Object.keys(service.functions).forEach(functionName => {
-      const functionLogicalId = this.provider.naming
-        .getLambdaLogicalId(functionName);
-      const resourceName = account.replace(/\b\w/g, l => l.toUpperCase()).replace(/[_\W]+/g, "");
-      resources.Resources[`${functionLogicalId}PermitInvokeFrom${resourceName}`] = {
-        Type: 'AWS::Lambda::Permission',
-        Properties: {
-          Action: 'lambda:InvokeFunction',
-          FunctionName: {
-            'Fn::GetAtt': [ functionLogicalId, 'Arn' ],
-          },
-          Principal: account,
-        }
-      };
+      let localAllowAccess = service.functions[functionName].allowAccess;
+      if (localAllowAccess === false || (globalAllowAccess.length === 0 && !localAllowAccess)) {
+        return;
+      }
+
+      const functionAllowAccess = localAllowAccess
+        ? [].concat(localAllowAccess)
+        : globalAllowAccess;
+
+      const functionLogicalId = this.provider.naming.getLambdaLogicalId(functionName);
+
+      functionAllowAccess.forEach(principal => {
+        principal = principal.toString();
+        const resourceName = principal.replace(/\b\w/g, l => l.toUpperCase()).replace(/[_\W]+/g, "");
+        resources.Resources[`${functionLogicalId}PermitInvokeFrom${resourceName}`] = {
+          Type: 'AWS::Lambda::Permission',
+          Properties: {
+            Action: 'lambda:InvokeFunction',
+            FunctionName: {
+              'Fn::GetAtt': [ functionLogicalId, 'Arn' ],
+            },
+            Principal: principal
+          }
+        };
+      });
     });
   }
 
   beforeDeploy() {
     const service = this.serverless.service;
-    const permitAccounts =
-      service.provider &&
-      service.provider.permitAccounts &&
-      service.provider.permitAccounts.toString();
+    let globalAllowAccess = service.provider && service.provider.allowAccess
+      ? [].concat(service.provider.allowAccess)
+      : [];
 
-    if (permitAccounts) {
-      permitAccounts.split(',').map(this.addPoliciesForAccount.bind(this));
-    }
+    this.addPoliciesForFunctions(globalAllowAccess);
   }
 };
