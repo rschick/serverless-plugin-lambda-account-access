@@ -157,7 +157,8 @@ describe('serverless-plugin-lambda-account-access', function() {
                 'Fn::GetAtt': [ 'Function1LambdaFunction', 'Arn' ],
               },
               'Principal': '222222222222'
-            }
+            },
+            'DependsOn': 'Function1LambdaFunctionPermitInvokeFrom111111111111'
           },
           'Function2LambdaFunctionPermitInvokeFrom111111111111': {
             'Type': 'AWS::Lambda::Permission',
@@ -177,7 +178,8 @@ describe('serverless-plugin-lambda-account-access', function() {
                 'Fn::GetAtt': [ 'Function2LambdaFunction', 'Arn' ],
               },
               'Principal': '222222222222'
-            }
+            },
+            'DependsOn': 'Function2LambdaFunctionPermitInvokeFrom111111111111'
           }
         });
     });
@@ -215,7 +217,8 @@ describe('serverless-plugin-lambda-account-access', function() {
                 'Fn::GetAtt': [ 'Function2LambdaFunction', 'Arn' ],
               },
               'Principal': '222222222222'
-            }
+            },
+            'DependsOn': 'Function2LambdaFunctionPermitInvokeFrom111111111111'
           }
         });
     });
@@ -253,7 +256,8 @@ describe('serverless-plugin-lambda-account-access', function() {
                 'Fn::GetAtt': [ 'Function2LambdaFunction', 'Arn' ],
               },
               'Principal': '222222222222'
-            }
+            },
+            'DependsOn': 'Function2LambdaFunctionPermitInvokeFrom111111111111'
           }
         });
     });
@@ -291,7 +295,8 @@ describe('serverless-plugin-lambda-account-access', function() {
                 'Fn::GetAtt': [ 'Function1LambdaFunction', 'Arn' ],
               },
               'Principal': '444444444444'
-            }
+            },
+            'DependsOn': 'Function1LambdaFunctionPermitInvokeFrom333333333333'
           },
           'Function2LambdaFunctionPermitInvokeFrom111111111111': {
             'Type': 'AWS::Lambda::Permission',
@@ -311,7 +316,8 @@ describe('serverless-plugin-lambda-account-access', function() {
                 'Fn::GetAtt': [ 'Function2LambdaFunction', 'Arn' ],
               },
               'Principal': '222222222222'
-            }
+            },
+            'DependsOn': 'Function2LambdaFunctionPermitInvokeFrom111111111111'
           }
         });
     });
