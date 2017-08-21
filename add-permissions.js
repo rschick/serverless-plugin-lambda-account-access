@@ -38,10 +38,11 @@ module.exports = class AwsAddLambdaAccountPermissions {
 
       const functionLogicalId = this.provider.naming.getLambdaLogicalId(functionName);
 
-      functionAllowAccess.forEach(principal => {
+      functionAllowAccess.reduce((previousResourceName, principal) => {
         principal = principal.toString();
-        const resourceName = principal.replace(/\b\w/g, l => l.toUpperCase()).replace(/[_\W]+/g, "");
-        resources.Resources[`${functionLogicalId}PermitInvokeFrom${resourceName}`] = {
+        const principalName = principal.replace(/\b\w/g, l => l.toUpperCase()).replace(/[_\W]+/g, "");
+        const resourceName = `${functionLogicalId}PermitInvokeFrom${principalName}`;
+        const resource = {
           Type: 'AWS::Lambda::Permission',
           Properties: {
             Action: 'lambda:InvokeFunction',
@@ -51,7 +52,14 @@ module.exports = class AwsAddLambdaAccountPermissions {
             Principal: principal
           }
         };
-      });
+
+        if (previousResourceName) {
+          resource.DependsOn = previousResourceName;
+        }
+
+        resources.Resources[resourceName] = resource;
+        return resourceName;
+      }, null);
     });
   }
 
