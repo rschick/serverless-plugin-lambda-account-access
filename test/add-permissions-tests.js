@@ -8,7 +8,7 @@ const AwsAddLambdaAccountPermissions = require('../add-permissions');
 function createTestInstance(options) {
   options = options || {};
   return new AwsAddLambdaAccountPermissions({
-    version: options.version || '1.2.0',
+    version: options.version || '1.12.0',
     service: {
       provider: options.provider || {},
       functions: options.functions,
@@ -30,18 +30,18 @@ describe('serverless-plugin-lambda-account-access', function() {
 
   describe('#constructor', function() {
     it('should throw on older version', function() {
-      expect(() => createTestInstance({ version: '1.1.1' }))
-        .to.throw('serverless-plugin-lambda-account-access requires serverless 1.2 or higher!');
+      expect(() => createTestInstance({ version: '1.11.0' }))
+        .to.throw('serverless-plugin-lambda-account-access requires serverless 1.12 or higher!');
     });
 
     it('should create hooks', function() {
       const instance = createTestInstance();
       expect(instance)
         .to.have.property('hooks')
-        .that.has.all.keys('before:deploy:createDeploymentArtifacts');
+        .that.has.all.keys('package:createDeploymentArtifacts');
 
       const stub = sinon.stub(instance, 'addPoliciesForFunctions');
-      instance.hooks['before:deploy:createDeploymentArtifacts']();
+      instance.hooks['package:createDeploymentArtifacts']();
 
       sinon.assert.calledOnce(stub);
     });
