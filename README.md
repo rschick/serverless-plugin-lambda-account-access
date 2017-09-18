@@ -15,7 +15,7 @@ plugins:
   - serverless-plugin-lambda-account-access
 
 provider:
-  allowAccounts: # can be defined as a single value or an array
+  allowAccess: # can be defined as a single value or an array
     - 111111111111 # principal as accountId
     - 'arn:aws:iam::222222222222:root' # principal as ARN
 
