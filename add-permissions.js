@@ -40,8 +40,9 @@ module.exports = class AwsAddLambdaAccountPermissions {
 
       functionAllowAccess.reduce((previousResourceName, principal) => {
         let principalString;
-        if (principal instanceof Object && principal['Fn::ImportValue']) {
-          principalString = principal['Fn::ImportValue'];
+        const fnName = principal instanceof Object ? Object.keys(principal).find(k => k.indexOf('Fn::') >= 0) : undefined;
+        if (fnName) {
+          principalString = principal[fnName].toString();
         }
         else {
           principal = principal.toString();
