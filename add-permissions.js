@@ -39,8 +39,15 @@ module.exports = class AwsAddLambdaAccountPermissions {
       const functionLogicalId = this.provider.naming.getLambdaLogicalId(functionName);
 
       functionAllowAccess.reduce((previousResourceName, principal) => {
-        principal = principal.toString();
-        const principalName = principal.replace(/\b\w/g, l => l.toUpperCase()).replace(/[_\W]+/g, "");
+        let principalString;
+        if (principal instanceof Object && principal['Fn::ImportValue']) {
+          principalString = principal['Fn::ImportValue'];
+        }
+        else {
+          principal = principal.toString();
+          principalString = principal;
+        }
+        const principalName = principalString.replace(/\b\w/g, l => l.toUpperCase()).replace(/[_\W]+/g, "");
         const resourceName = `${functionLogicalId}PermitInvokeFrom${principalName}`;
         const resource = {
           Type: 'AWS::Lambda::Permission',
