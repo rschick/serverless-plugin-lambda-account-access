@@ -347,6 +347,31 @@ describe('serverless-plugin-lambda-account-access', function() {
         });
     });
 
+    it('should support principal to be an ARN Output from CloudFormation', function() {
+      const instance = createTestInstance({
+        functions: {
+          function1: {}
+        }
+      });
+
+      instance.addPoliciesForFunctions([{'Fn::ImportValue':'output-role-arn'}]);
+
+      expect(instance)
+        .to.have.deep.property('serverless.service.resources.Resources')
+        .that.deep.equals({
+          'Function1LambdaFunctionPermitInvokeFromOutputRoleArn': {
+            'Type': 'AWS::Lambda::Permission',
+            'Properties': {
+              'Action': 'lambda:InvokeFunction',
+              'FunctionName': {
+                'Fn::GetAtt': [ 'Function1LambdaFunction', 'Arn' ],
+              },
+              'Principal': {'Fn::ImportValue':'output-role-arn'}
+            }
+          }
+        });
+    });
+
     it('should support local allowAccess to be a single value', function() {
       const instance = createTestInstance({
         functions: {
