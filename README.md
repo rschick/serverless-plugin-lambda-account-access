@@ -2,7 +2,7 @@
 
 # serverless-plugin-lambda-account-access
 
-Add policies to allow cross-account access to your functions.
+Add policies and/or roles to allow cross-account access to your functions.
 
 ## Usage Example
 
@@ -15,39 +15,30 @@ plugins:
   - serverless-plugin-lambda-account-access
 
 provider:
-  allowAccess: # can be defined as a single value or an array
-    - 111111111111 # principal as accountId
-    - 'arn:aws:iam::222222222222:root' # principal as ARN
-    - Fn::Import: cloudformation-output-arn # principal as CloudFormation Output Value ARN
+  access:
+    groups:
+      api: # group has both role and policy access configured
+        role:
+          - name: sample-${self:custom.stage}-lambda-api-${self:custom.region}
+            principals: # can be defined as a single value or an array
+              - 222222222222 # principal as accountId
+              - 'arn:aws:iam::333333333333:root' # principal as ARN
+              - Fn::Import: cloudformation-output-arn-2 # principal as CloudFormation Output Value ARN
+        policy:
+          principals:
+            - 111111111111
+            - 'arn:aws:iam::222222222222:root'
+            - Fn::Import: cloudformation-output-arn
+      other:
+        policy:
+          principals: 333333333333
 
 functions:
-  function1:
+  function1: # access is not allowed
   function2:
-    allowAccess: false # excludes specific function
+    allowAccess: api # allow access for principals specified in api group only
   function3:
-    allowAccess: 333333333333 # allows access from these principals instead of the globally defined ones
+    allowAccess: # allow access for principals specified in both api and other
+      - api
+      - other
 ```
-
-The above allows all functions to be invoked from the principals listed in `provider` section, unless access is explicitly forbidden inside function config (`function2`), or accounts list is overridden locally (`function3`).
-
-Permissions are granted by adding resources of the form:
-
-```yaml
-resources:
-  Resources:
-    Function1LambdaFunctionPermitInvokeFrom111111111111:
-    Type: AWS::Lambda::Permission
-      Properties:
-        Action: lambda:InvokeFunction
-        FunctionName:
-          Fn::GetAtt:
-            - Function1LambdaFunction
-            - Arn
-      Principal: '111111111111'
-```
-
-## Migration From 1.x
-
-Version 2 has the following breaking changes:
-  - `permitAccounts` field was changed to `allowAccess`
-  - multiple principals can be defined as an array, instead of CSV list
