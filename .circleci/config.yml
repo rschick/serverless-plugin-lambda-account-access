@@ -1,0 +1,69 @@
+version: 2.0
+
+references:
+
+  workspace_root: &workspace_root
+    ./
+
+  node_container: &node_container
+    docker:
+      - image: circleci/node:8
+
+  attach_workspace: &attach_workspace
+    attach_workspace:
+      at: *workspace_root
+
+  run_always: &run_always
+    filters:
+      tags:
+        only: /.*/
+
+  run_unless_tagged: &run_unless_tagged
+    filters:
+      tags:
+        ignore: /.*/
+
+  run_on_master_tagged: &run_on_master_tagged
+    filters:
+      branches:
+        ignore: /.*/
+      tags:
+        only: /v[0-9]+(\.[0-9]+)*/
+
+jobs:
+  dependencies:
+    <<: *node_container
+    steps:
+      - checkout
+      - run: npm install
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - node_modules
+  test:
+    <<: *node_container
+    steps:
+      - checkout
+      - *attach_workspace
+      - run: npm run test
+  publish:
+    <<: *node_container
+    steps:
+      - checkout
+      - *attach_workspace
+      - run: sudo npm install -g publish
+      - run: publish
+
+workflows:
+  version: 2
+  default:
+    jobs:
+      - dependencies:
+          <<: *run_always
+      - test:
+          requires: [ 'dependencies' ]
+          <<: *run_unless_tagged
+      - publish:
+          context: ci-publish
+          requires: [ 'dependencies' ]
+          <<: *run_on_master_tagged
