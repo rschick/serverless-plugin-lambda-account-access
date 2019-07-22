@@ -13,7 +13,7 @@ function createTestInstance(options) {
       log: () => {}
     },
     service: {
-      provider: options.provider || {},
+      provider: options.provider,
       functions: options.functions,
       resources: options.resources ? { Resources: options.resources } : undefined
     },
@@ -73,8 +73,23 @@ describe('serverless-plugin-lambda-account-access', function() {
         .that.is.undefined;
     });
 
+    it('should not add resources when provider config is not set', function() {
+      const instance = createTestInstance({
+        functions: {
+          function1: {}
+        }
+      });
+
+      instance.beforeDeploy();
+
+      expect(instance)
+        .to.have.nested.property('serverless.service.resources')
+        .that.is.undefined;
+    });
+
     it('should not add resources when access config is not set', function() {
       const instance = createTestInstance({
+        provider: {},
         functions: {
           function1: {}
         }
