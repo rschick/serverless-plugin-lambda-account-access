@@ -59,8 +59,10 @@ workflows:
   default:
     jobs:
       - dependencies:
+          context: ci-readonly
           <<: *run_always
       - test:
+          context: ci-readonly
           requires: [ 'dependencies' ]
           <<: *run_unless_tagged
       - publish:
