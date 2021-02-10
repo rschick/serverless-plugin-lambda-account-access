@@ -1,6 +1,7 @@
  'use strict';
 
 const semver = require('semver');
+const addValidation = require('./validation');
 
 module.exports = class AwsAddLambdaAccountPermissions {
   constructor(serverless, options) {
@@ -13,18 +14,8 @@ module.exports = class AwsAddLambdaAccountPermissions {
     this.hooks = {
       'package:createDeploymentArtifacts': () => this.beforeDeploy(),
     };
-    this.serverless.configSchemaHandler.defineFunctionProperties(this.provider, {
-      properties: {
-        allowAccess: { type: 'array' },
-      },
-    });
-   this.serverless.configSchemaHandler.defineProvider(this.provider, {
-      provider: {
-        properties: {
-          access: { type: 'object' },
-        },
-      }
-    });
+
+    addValidation(serverless);
   }
 
   addPermissions(accessConfig) {
