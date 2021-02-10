@@ -29,15 +29,6 @@ describe('serverless-plugin-lambda-account-access', function() {
 
       sinon.assert.calledOnce(stub);
     });
-
-    it('should create defineFunctionProperties on configSchemaHandler', function() {
-
-      const instance = createTestInstance();
-      expect(instance)
-        .to.have.property('serverless')
-        .that.has.property('configSchemaHandler')
-        .that.has.property('defineFunctionProperties');
-    });
   });
 
   describe('#beforeDeploy', function() {
