@@ -13,6 +13,18 @@ module.exports = class AwsAddLambdaAccountPermissions {
     this.hooks = {
       'package:createDeploymentArtifacts': () => this.beforeDeploy(),
     };
+    this.serverless.configSchemaHandler.defineFunctionProperties('serverless-plugin-lambda-account-access', {
+      properties: {
+        allowAccess: { type: 'array' },
+      },
+    });
+   this.serverless.configSchemaHandler.defineProvider('serverless-plugin-lambda-account-access', {
+      provider: {
+        properties: {
+          access: { type: 'object' },
+        },
+      }
+    });
   }
 
   addPermissions(accessConfig) {

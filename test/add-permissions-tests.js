@@ -12,6 +12,10 @@ function createTestInstance(options) {
     cli: {
       log: () => {}
     },
+    configSchemaHandler: {
+      defineFunctionProperties: () => {},
+      defineProvider: () => {},
+    },
     service: {
       provider: options.provider,
       functions: options.functions,
@@ -47,6 +51,22 @@ describe('serverless-plugin-lambda-account-access', function() {
       instance.hooks['package:createDeploymentArtifacts']();
 
       sinon.assert.calledOnce(stub);
+    });
+
+    it('should create defineFunctionProperties on configSchemaHandler', function() {
+      const instance = createTestInstance();
+      expect(instance)
+        .to.have.property('serverless')
+        .that.has.property('configSchemaHandler')
+        .that.has.property('defineFunctionProperties');
+    });
+
+    it('should create defineProvider on configSchemaHandler', function() {
+      const instance = createTestInstance();
+      expect(instance)
+        .to.have.property('serverless')
+        .that.has.property('configSchemaHandler')
+        .that.has.property('defineProvider');
     });
   });
 
