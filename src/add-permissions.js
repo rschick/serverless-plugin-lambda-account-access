@@ -1,6 +1,7 @@
  'use strict';
 
 const semver = require('semver');
+
 const addValidation = require('./validation');
 
 module.exports = class AwsAddLambdaAccountPermissions {

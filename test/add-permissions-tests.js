@@ -3,38 +3,15 @@
 const expect = require('chai').expect;
 const sinon = require('sinon');
 
-const AwsAddLambdaAccountPermissions = require('../add-permissions');
+const AwsAddLambdaAccountPermissions = require('../src/add-permissions');
+const buildServerless = require('./serverless');
 
 function createTestInstance(options) {
   options = options || {};
-  return new AwsAddLambdaAccountPermissions({
-    version: options.version || '1.12.0',
-    cli: {
-      log: () => {}
-    },
-    configSchemaHandler: {
-      defineFunctionProperties: () => {},
-      defineProvider: () => {},
-    },
-    service: {
-      provider: options.provider,
-      functions: options.functions,
-      resources: options.resources ? { Resources: options.resources } : undefined
-    },
-    getProvider: () => {
-      return {
-        naming: {
-          getLambdaLogicalId(functionName) {
-            return `${functionName.charAt(0).toUpperCase()}${functionName.slice(1)}LambdaFunction`
-          }
-        }
-      };
-    }
-  }, {});
+  return new AwsAddLambdaAccountPermissions(buildServerless(options), {});
 }
 
 describe('serverless-plugin-lambda-account-access', function() {
-
   describe('#constructor', function() {
     it('should throw on older version', function() {
       expect(() => createTestInstance({ version: '1.11.0' }))
@@ -54,19 +31,12 @@ describe('serverless-plugin-lambda-account-access', function() {
     });
 
     it('should create defineFunctionProperties on configSchemaHandler', function() {
+
       const instance = createTestInstance();
       expect(instance)
         .to.have.property('serverless')
         .that.has.property('configSchemaHandler')
         .that.has.property('defineFunctionProperties');
-    });
-
-    it('should create defineProvider on configSchemaHandler', function() {
-      const instance = createTestInstance();
-      expect(instance)
-        .to.have.property('serverless')
-        .that.has.property('configSchemaHandler')
-        .that.has.property('defineProvider');
     });
   });
 
