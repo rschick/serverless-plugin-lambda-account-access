@@ -5,7 +5,7 @@
     "node": ">=8.10"
   },
   "description": "A Serverless plugin to allow other accounts to invoke your Lambda functions",
-  "main": "add-permissions.js",
+  "main": "src/add-permissions.js",
   "scripts": {
     "test": "nyc --reporter=lcov --reporter=text mocha",
     "posttest": "eslint .",

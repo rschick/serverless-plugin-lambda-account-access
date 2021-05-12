@@ -2,6 +2,8 @@
 
 const semver = require('semver');
 
+const addValidation = require('./validation');
+
 module.exports = class AwsAddLambdaAccountPermissions {
   constructor(serverless, options) {
     if (!semver.satisfies(serverless.version, '>= 1.12')) {
@@ -13,6 +15,8 @@ module.exports = class AwsAddLambdaAccountPermissions {
     this.hooks = {
       'package:createDeploymentArtifacts': () => this.beforeDeploy(),
     };
+
+    addValidation(serverless);
   }
 
   addPermissions(accessConfig) {
