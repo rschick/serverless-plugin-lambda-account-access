@@ -66,7 +66,7 @@ module.exports = class AwsAddLambdaAccountPermissions {
         }
 
         if (role) {
-          [].concat(role).forEach(({ allowTagSession, maxSessionDuration, name, principals }) => {
+          [].concat(role).forEach(({ allowTagSession = false, maxSessionDuration = 3600, name, principals }) => {
             if (!name) {
               throw new Error(`Group "${groupName}" does not have role name configured`);
             }
@@ -113,7 +113,7 @@ module.exports = class AwsAddLambdaAccountPermissions {
                       }
                     }]
                   },
-                  MaxSessionDuration: maxSessionDuration || 3600 // 1 hour (default)
+                  MaxSessionDuration: maxSessionDuration
                 }
               };
 
