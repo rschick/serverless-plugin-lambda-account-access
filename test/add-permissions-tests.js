@@ -800,6 +800,7 @@ describe('serverless-plugin-lambda-account-access', function() {
               'Type': 'AWS::IAM::Role',
               'Properties': {
                 'RoleName': 'foo',
+                'MaxSessionDuration': 3600,
                 'Policies': [{
                   'PolicyName': 'foo',
                   'PolicyDocument': {
@@ -862,6 +863,7 @@ describe('serverless-plugin-lambda-account-access', function() {
               'Type': 'AWS::IAM::Role',
               'Properties': {
                 'RoleName': 'foo',
+                'MaxSessionDuration': 3600,
                 'Policies': [{
                   'PolicyName': 'foo',
                   'PolicyDocument': {
@@ -930,6 +932,7 @@ describe('serverless-plugin-lambda-account-access', function() {
               'Type': 'AWS::IAM::Role',
               'Properties': {
                 'RoleName': 'foo',
+                'MaxSessionDuration': 3600,
                 'Policies': [{
                   'PolicyName': 'foo',
                   'PolicyDocument': {
@@ -960,6 +963,7 @@ describe('serverless-plugin-lambda-account-access', function() {
               'Type': 'AWS::IAM::Role',
               'Properties': {
                 'RoleName': 'foo2',
+                'MaxSessionDuration': 3600,
                 'Policies': [{
                   'PolicyName': 'foo2',
                   'PolicyDocument': {
@@ -1020,6 +1024,7 @@ describe('serverless-plugin-lambda-account-access', function() {
               'Type': 'AWS::IAM::Role',
               'Properties': {
                 'RoleName': 'foo',
+                'MaxSessionDuration': 3600,
                 'Policies': [{
                   'PolicyName': 'foo',
                   'PolicyDocument': {
@@ -1087,6 +1092,7 @@ describe('serverless-plugin-lambda-account-access', function() {
               'Type': 'AWS::IAM::Role',
               'Properties': {
                 'RoleName': 'foo',
+                'MaxSessionDuration': 3600,
                 'Policies': [{
                   'PolicyName': 'foo',
                   'PolicyDocument': {
@@ -1116,6 +1122,7 @@ describe('serverless-plugin-lambda-account-access', function() {
               'Type': 'AWS::IAM::Role',
               'Properties': {
                 'RoleName': 'foo2',
+                'MaxSessionDuration': 3600,
                 'Policies': [{
                   'PolicyName': 'foo2',
                   'PolicyDocument': {
@@ -1174,6 +1181,7 @@ describe('serverless-plugin-lambda-account-access', function() {
               'Type': 'AWS::IAM::Role',
               'Properties': {
                 'RoleName': 'foo',
+                'MaxSessionDuration': 3600,
                 'Policies': [{
                   'PolicyName': 'foo',
                   'PolicyDocument': {
@@ -1232,6 +1240,7 @@ describe('serverless-plugin-lambda-account-access', function() {
               'Type': 'AWS::IAM::Role',
               'Properties': {
                 'RoleName': 'foo',
+                'MaxSessionDuration': 3600,
                 'Policies': [{
                   'PolicyName': 'foo',
                   'PolicyDocument': {
@@ -1254,6 +1263,129 @@ describe('serverless-plugin-lambda-account-access', function() {
                       AWS: [
                         { 'Fn::ImportValue':'output-role-arn' }
                       ]
+                    }
+                  }]
+                }
+              }
+            }
+          });
+      });
+
+      it('should support max session duration', function() {
+        const instance = createTestInstance({
+          provider: {
+            access: {
+              groups: {
+                api: {
+                  role: [{
+                    name: 'foo',
+                    principals: 111111111111,
+                    maxSessionDuration: 43200
+                  }]
+                }
+              }
+            }
+          },
+          functions: {
+            function1: {
+              allowAccess: 'api'
+            }
+          }
+        });
+
+        instance.beforeDeploy();
+
+        expect(instance)
+          .to.have.nested.property('serverless.service.resources.Resources')
+          .that.deep.equals({
+            'LambdaAccessRoleFoo': {
+              'Type': 'AWS::IAM::Role',
+              'Properties': {
+                'RoleName': 'foo',
+                'MaxSessionDuration': 43200,
+                'Policies': [{
+                  'PolicyName': 'foo',
+                  'PolicyDocument': {
+                    'Version': '2012-10-17',
+                    'Statement': [{
+                      'Effect': 'Allow',
+                      'Action': 'lambda:InvokeFunction',
+                      'Resource': [
+                        { 'Fn::GetAtt': [ 'Function1LambdaFunction', 'Arn' ] }
+                      ]
+                    }]
+                  }
+                }],
+                'AssumeRolePolicyDocument': {
+                  'Version': '2012-10-17',
+                  'Statement': [{
+                    'Effect': 'Allow',
+                    'Action': 'sts:AssumeRole',
+                    'Principal': {
+                      AWS: ['111111111111']
+                    }
+                  }]
+                }
+              }
+            }
+          });
+      });
+
+      it('should support allowing sts:TagSession', function() {
+        const instance = createTestInstance({
+          provider: {
+            access: {
+              groups: {
+                api: {
+                  role: [{
+                    name: 'foo',
+                    principals: 111111111111,
+                    allowTagSession: true
+                  }]
+                }
+              }
+            }
+          },
+          functions: {
+            function1: {
+              allowAccess: 'api'
+            }
+          }
+        });
+
+        instance.beforeDeploy();
+
+        expect(instance)
+          .to.have.nested.property('serverless.service.resources.Resources')
+          .that.deep.equals({
+            'LambdaAccessRoleFoo': {
+              'Type': 'AWS::IAM::Role',
+              'Properties': {
+                'RoleName': 'foo',
+                'MaxSessionDuration': 3600,
+                'Policies': [{
+                  'PolicyName': 'foo',
+                  'PolicyDocument': {
+                    'Version': '2012-10-17',
+                    'Statement': [{
+                      'Effect': 'Allow',
+                      'Action': 'lambda:InvokeFunction',
+                      'Resource': [
+                        { 'Fn::GetAtt': [ 'Function1LambdaFunction', 'Arn' ] }
+                      ]
+                    }]
+                  }
+                }],
+                'AssumeRolePolicyDocument': {
+                  'Version': '2012-10-17',
+                  'Statement': [{
+                    'Effect': 'Allow',
+                    'Action': [
+                      'sts:AssumeRole',
+                      'sts:TagSession'
+                    ],
+                    'Principal': {
+                      AWS: ['111111111111']
                     }
                   }]
                 }

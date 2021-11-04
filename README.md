@@ -24,6 +24,8 @@ provider:
               - 222222222222 # principal as accountId
               - 'arn:aws:iam::333333333333:root' # principal as ARN
               - Fn::Import: cloudformation-output-arn-2 # principal as CloudFormation Output Value ARN
+            allowTagSession: True # can optionally be defined to include sts:TagSession in assume role policy
+            maxSessionDuration: 3600 # can optionally be defined to control max duration of an assume role session
         policy:
           principals:
             - 111111111111

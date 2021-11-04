@@ -66,7 +66,7 @@ module.exports = class AwsAddLambdaAccountPermissions {
         }
 
         if (role) {
-          [].concat(role).forEach(({ name, principals }) => {
+          [].concat(role).forEach(({ allowTagSession = false, maxSessionDuration = 3600, name, principals }) => {
             if (!name) {
               throw new Error(`Group "${groupName}" does not have role name configured`);
             }
@@ -78,6 +78,11 @@ module.exports = class AwsAddLambdaAccountPermissions {
             const resourceName = `LambdaAccessRole${this.normalizeName(name)}`;
             if (resources.Resources[resourceName]) {
               throw new Error(`Roles must have unique names [${name}]`);
+            }
+
+            let stsAction = 'sts:AssumeRole';
+            if (allowTagSession) {
+              stsAction = ['sts:AssumeRole', 'sts:TagSession'];
             }
 
             if (principals.length !== 0) {
@@ -102,12 +107,13 @@ module.exports = class AwsAddLambdaAccountPermissions {
                     Version: '2012-10-17',
                     Statement: [{
                       Effect: 'Allow',
-                      Action: 'sts:AssumeRole',
+                      Action: stsAction,
                       Principal: {
                         AWS: [].concat(principals).map(principal => this.normalizePrincipal(principal).principal)
                       }
                     }]
-                  }
+                  },
+                  MaxSessionDuration: maxSessionDuration
                 }
               };
 
