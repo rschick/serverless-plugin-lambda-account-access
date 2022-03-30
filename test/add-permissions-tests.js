@@ -102,20 +102,6 @@ describe('serverless-plugin-lambda-account-access', function() {
         .that.is.undefined;
     });
 
-    it('should throw when access config does not have groups', function() {
-      const instance = createTestInstance({
-        provider: {
-          access: {}
-        },
-        functions: {
-          function1: {}
-        }
-      });
-
-      expect(() => instance.beforeDeploy())
-        .to.throw('Access configuration must have groups defined');
-    });
-
     it('should throw when function references access group that does not exist', function() {
       const instance = createTestInstance({
         provider: {
@@ -207,28 +193,6 @@ describe('serverless-plugin-lambda-account-access', function() {
     });
 
     describe('policy', function() {
-      it('should throw when policy principals are not configured', function() {
-        const instance = createTestInstance({
-          provider: {
-            access: {
-              groups: {
-                api: {
-                  policy: {}
-                }
-              }
-            }
-          },
-          functions: {
-            function1: {
-              allowAccess: 'api'
-            }
-          }
-        });
-
-        expect(() => instance.beforeDeploy())
-          .to.throw('Group "api" does not have policy principals configured');
-      });
-
       it('should support single principal', function() {
         const instance = createTestInstance({
           provider: {
@@ -660,54 +624,6 @@ describe('serverless-plugin-lambda-account-access', function() {
     });
 
     describe('role', function() {
-      it('should throw when role does not have name', function() {
-        const instance = createTestInstance({
-          provider: {
-            access: {
-              groups: {
-                api: {
-                  role: [{
-                    principals: 111111111111
-                  }]
-                }
-              }
-            }
-          },
-          functions: {
-            function1: {
-              allowAccess: 'api'
-            }
-          }
-        });
-
-        expect(() => instance.beforeDeploy())
-          .to.throw('Group "api" does not have role name configured');
-      });
-
-      it('should throw when role does not have principals', function() {
-        const instance = createTestInstance({
-          provider: {
-            access: {
-              groups: {
-                api: {
-                  role: [{
-                    name: 'foo'
-                  }]
-                }
-              }
-            }
-          },
-          functions: {
-            function1: {
-              allowAccess: 'api'
-            }
-          }
-        });
-
-        expect(() => instance.beforeDeploy())
-          .to.throw('Role "foo" in the "api" group does not have principals configured');
-      });
-
       it('should throw when role names are not unique', function() {
         const instance = createTestInstance({
           provider: {

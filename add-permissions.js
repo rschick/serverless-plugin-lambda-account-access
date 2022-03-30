@@ -81,19 +81,25 @@ module.exports = class AwsAddLambdaAccountPermissions {
       'package:createDeploymentArtifacts': () => this.beforeDeploy(),
     };
 
-    serverless.configSchemaHandler.defineFunctionProperties('aws', {
-      properties: {
-        allowAccess: STRING_OR_STRING_ARRAY,
-      },
-    });
-
-    serverless.configSchemaHandler.defineProvider('aws', {
-      provider: {
-        properties: {
-          access: ACCESS_SCHEMA,
-        },
+    if (serverless.configSchemaHandler) {
+      if (serverless.configSchemaHandler.defineFunctionProperties) {
+        serverless.configSchemaHandler.defineFunctionProperties('aws', {
+          properties: {
+            allowAccess: STRING_OR_STRING_ARRAY,
+          },
+        });
       }
-    });
+
+      if (serverless.configSchemaHandler.defineProvider) {
+        serverless.configSchemaHandler.defineProvider('aws', {
+          provider: {
+            properties: {
+              access: ACCESS_SCHEMA,
+            },
+          }
+        });
+      }
+    }
   }
 
   addPermissions(accessConfig) {
