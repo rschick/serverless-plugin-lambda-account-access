@@ -1,18 +1,100 @@
  'use strict';
 
-const semver = require('semver');
+const STRING_OR_STRING_ARRAY = {
+  anyOf: [
+    {
+      type: 'array',
+      items: {
+        type: 'string'
+      }
+    },
+    {
+      type: 'string'
+    }
+  ]
+};
+
+const ROLE_SCHEMA = {
+  type: 'object',
+  properties: {
+    name: { type: 'string' },
+    principals: STRING_OR_STRING_ARRAY,
+    allowTagSession: { type: 'boolean' },
+    maxSessionDuration: {
+      type: 'integer',
+      minimum: 3600,
+      maximum: 43200,
+    },
+  },
+  required: ['name', 'principals'],
+  additionalProperties: false,
+};
+
+const ACCESS_SCHEMA = {
+  type: 'object',
+  properties: {
+    groups: {
+      type: 'object',
+      patternProperties: {
+        '.+': {
+          type: 'object',
+          properties: {
+            role: {
+              anyOf: [
+                {
+                  type: 'array',
+                  items: ROLE_SCHEMA
+                },
+                ROLE_SCHEMA,
+              ]
+            },
+            policy: {
+              type: 'object',
+              properties: {
+                principals: STRING_OR_STRING_ARRAY,
+              },
+              required: ['principals']
+            },
+          },
+          minProperties: 1,
+          additionalProperties: false,
+        }
+      },
+      minProperties: 1,
+    },
+  },
+  required: ['groups'],
+  additionalProperties: false,
+};
 
 module.exports = class AwsAddLambdaAccountPermissions {
   constructor(serverless, options) {
-    if (!semver.satisfies(serverless.version, '>= 1.12')) {
-      throw new Error('serverless-plugin-lambda-account-access requires serverless 1.12 or higher!');
-    }
     this.serverless = serverless;
     this.options = options;
     this.provider = this.serverless.getProvider('aws');
     this.hooks = {
       'package:createDeploymentArtifacts': () => this.beforeDeploy(),
     };
+
+    if (serverless.configSchemaHandler) {
+      if (serverless.configSchemaHandler.defineFunctionProperties) {
+        serverless.configSchemaHandler.defineFunctionProperties('aws', {
+          properties: {
+            allowAccess: STRING_OR_STRING_ARRAY,
+          },
+        });
+      }
+
+      if (serverless.configSchemaHandler.defineProvider) {
+        serverless.configSchemaHandler.defineProvider('aws', {
+          provider: {
+            properties: {
+              access: ACCESS_SCHEMA,
+            },
+          }
+        });
+      }
+    }
   }
 
   addPermissions(accessConfig) {
@@ -27,12 +109,7 @@ module.exports = class AwsAddLambdaAccountPermissions {
 
       if (functions.length !== 0) {
         if (policy) {
-          const { principals } = policy;
-          if (!principals) {
-            throw new Error(`Group "${groupName}" does not have policy principals configured`);
-          }
-
-          [].concat(principals).forEach(principal => {
+          [].concat(policy.principals).forEach(principal => {
             const {
               principal: normalizedPrincipal,
               principalName
@@ -67,14 +144,6 @@ module.exports = class AwsAddLambdaAccountPermissions {
 
         if (role) {
           [].concat(role).forEach(({ allowTagSession = false, maxSessionDuration = 3600, name, principals }) => {
-            if (!name) {
-              throw new Error(`Group "${groupName}" does not have role name configured`);
-            }
-
-            if (!principals) {
-              throw new Error(`Role "${name}" in the "${groupName}" group does not have principals configured`);
-            }
-
             const resourceName = `LambdaAccessRole${this.normalizeName(name)}`;
             if (resources.Resources[resourceName]) {
               throw new Error(`Roles must have unique names [${name}]`);
@@ -137,10 +206,6 @@ module.exports = class AwsAddLambdaAccountPermissions {
     }
 
     const { groups } = access;
-    if (!groups) {
-      throw new Error('Access configuration must have groups defined');
-    }
-
     const accessConfig = this.compileAccessConfig(groups, functions);
 
     this.addPermissions(accessConfig);
