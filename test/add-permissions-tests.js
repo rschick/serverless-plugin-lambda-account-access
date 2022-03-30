@@ -32,11 +32,6 @@ function createTestInstance(options) {
 describe('serverless-plugin-lambda-account-access', function() {
 
   describe('#constructor', function() {
-    it('should throw on older version', function() {
-      expect(() => createTestInstance({ version: '1.11.0' }))
-        .to.throw('serverless-plugin-lambda-account-access requires serverless 1.12 or higher!');
-    });
-
     it('should create hooks', function() {
       const instance = createTestInstance();
       expect(instance)

@@ -1,7 +1,5 @@
  'use strict';
 
-const semver = require('semver');
-
 const STRING_OR_STRING_ARRAY = {
   anyOf: [
     {
@@ -71,9 +69,6 @@ const ACCESS_SCHEMA = {
 
 module.exports = class AwsAddLambdaAccountPermissions {
   constructor(serverless, options) {
-    if (!semver.satisfies(serverless.version, '>= 1.12')) {
-      throw new Error('serverless-plugin-lambda-account-access requires serverless 1.12 or higher!');
-    }
     this.serverless = serverless;
     this.options = options;
     this.provider = this.serverless.getProvider('aws');
