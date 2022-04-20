@@ -1,6 +1,23 @@
  'use strict';
 
-const STRING_OR_STRING_ARRAY = {
+ const STRING_OR_NUMBER_SCHEMA = {
+  anyOf: [
+    { type: 'string' },
+    { type: 'integer' },
+  ],
+};
+
+const PRINCIPALS_SCHEMA = {
+  anyOf: [
+    {
+      type: 'array',
+      items: STRING_OR_NUMBER_SCHEMA
+    },
+    STRING_OR_NUMBER_SCHEMA
+  ]
+};
+
+const STRING_OR_STRING_ARRAY_SCHEMA = {
   anyOf: [
     {
       type: 'array',
@@ -18,7 +35,7 @@ const ROLE_SCHEMA = {
   type: 'object',
   properties: {
     name: { type: 'string' },
-    principals: STRING_OR_STRING_ARRAY,
+    principals: PRINCIPALS_SCHEMA,
     allowTagSession: { type: 'boolean' },
     maxSessionDuration: {
       type: 'integer',
@@ -51,7 +68,7 @@ const ACCESS_SCHEMA = {
             policy: {
               type: 'object',
               properties: {
-                principals: STRING_OR_STRING_ARRAY,
+                principals: PRINCIPALS_SCHEMA,
               },
               required: ['principals']
             },
@@ -80,7 +97,7 @@ module.exports = class AwsAddLambdaAccountPermissions {
       if (serverless.configSchemaHandler.defineFunctionProperties) {
         serverless.configSchemaHandler.defineFunctionProperties('aws', {
           properties: {
-            allowAccess: STRING_OR_STRING_ARRAY,
+            allowAccess: STRING_OR_STRING_ARRAY_SCHEMA,
           },
         });
       }
