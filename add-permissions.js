@@ -25,6 +25,7 @@ const ROLE_SCHEMA = {
       minimum: 3600,
       maximum: 43200,
     },
+    qualifier: { type: 'string' },
   },
   required: ['name', 'principals'],
   additionalProperties: false,
@@ -52,6 +53,7 @@ const ACCESS_SCHEMA = {
               type: 'object',
               properties: {
                 principals: STRING_OR_STRING_ARRAY,
+                qualifier: { type: 'string' },
               },
               required: ['principals']
             },
@@ -124,7 +126,13 @@ module.exports = class AwsAddLambdaAccountPermissions {
                   Properties: {
                     Action: 'lambda:InvokeFunction',
                     FunctionName: {
-                      'Fn::GetAtt': [ functionLogicalId, 'Arn' ],
+                      'Fn::Join': [
+                        ':',
+                        [
+                          { 'Fn::GetAtt': [ functionLogicalId, 'Arn' ] },
+                          policy.qualifier !== undefined ? policy.qualifier : '*',
+                        ]
+                      ],
                     },
                     Principal: normalizedPrincipal
                   }
@@ -143,7 +151,7 @@ module.exports = class AwsAddLambdaAccountPermissions {
         }
 
         if (role) {
-          [].concat(role).forEach(({ allowTagSession = false, maxSessionDuration = 3600, name, principals }) => {
+          [].concat(role).forEach(({ allowTagSession = false, maxSessionDuration = 3600, name, principals, qualifier = '*' }) => {
             const resourceName = `LambdaAccessRole${this.normalizeName(name)}`;
             if (resources.Resources[resourceName]) {
               throw new Error(`Roles must have unique names [${name}]`);
@@ -167,7 +175,13 @@ module.exports = class AwsAddLambdaAccountPermissions {
                         Effect: 'Allow',
                         Action: 'lambda:InvokeFunction',
                         Resource: functions.map(functionLogicalId => ({
-                          'Fn::GetAtt': [ functionLogicalId, 'Arn' ]
+                          'Fn::Join': [
+                            ':',
+                            [
+                              { 'Fn::GetAtt': [ functionLogicalId, 'Arn' ] },
+                              qualifier,
+                            ]
+                          ],
                         }))
                       }]
                     }
